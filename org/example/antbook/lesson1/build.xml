@@ -1,0 +1,74 @@
+<?xml version ="1.0"?>
+<project name="structured" default="execute">
+ 
+  <target name="init">
+     <mkdir dir="build/classes" />
+     <mkdir dir="dist" />
+     <property name="proceed" value="dontcare"/>
+  </target> 
+  <target name="compile" depends="clean,init,define">
+     <javac srcdir="src"
+           destdir="build/classes" />
+     <copy todir="backup">
+        <fileset refid="source.fileset"/>
+     </copy>
+     <copy todir="testcopy">
+        <fileset refid="testcopy.fileset"/>
+     </copy>
+     <copy todir="testcopy2">
+        <fileset dir=".">
+           <exclude name="build/**"/>
+           <exclude name="dist/**"/>
+           <exclude name="testcopy/**"/>
+           <exclude name="backup/**"/>
+           <exclude name="build.xml"/>
+        </fileset>
+     </copy>
+     <copy todir="testcopy3" includeemptydirs="false">
+        <fileset refid="testcopy3.fileset"/>
+        <mapper type="flatten"/>
+</copy>
+     <patternset id="xmlfiles">
+        <include name="**/*.xml"/>
+     </patternset>
+     <patternset id="nonjavafiles">
+        <exclude name="**/*.java"/>
+        <patternset refid="xmlfiles"/>
+     </patternset>
+     <property name="testnonjava" refid="nonjavafiles"/>
+     <echo>
+             testnonjava = ${testnonjava}
+     </echo>
+     <echo>Compilation Completed</echo>
+  </target>
+  <target name="archive" depends="compile">
+     <jar destfile="dist/project.jar"
+          basedir="build/classes" />
+     <echo>Archiving Completed</echo>
+  </target>
+  <target name="clean">
+      <delete dir="build" />
+      <delete dir="dist" />
+      <delete dir="backup" />
+      <delete dir="testcopy" />
+      <delete dir="testcopy2" />
+  </target>
+  <target name="execute" depends="archive">
+      <java
+       classname="org.example.antbook.lesson1.Main"
+classpath="build/classes" >
+       <arg value="a" />
+       <arg value="b" />
+       <arg file="." />
+      </java>
+  </target> 
+  <target name="define" if="proceed">
+    <fileset dir="src" includes="**/*.java" id="source.fileset"/>
+    <fileset dir="." excludes="build/**,dist/**" id ="testcopy.fileset"/>
+    <fileset dir="." id ="testcopy3.fileset"/>
+    <property name="customer" value="acme"/>
+    <xmlproperty file="${customer}.xml"/>
+    <echo message="Building for ${customer(name)} at ${customer.settings.Loc}"/>
+  </target>
+
+</project>
